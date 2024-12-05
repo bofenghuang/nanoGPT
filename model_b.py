@@ -29,10 +29,14 @@ class LayerNorm(nn.Module):
     def __init__(self, ndim: int, bias: bool):
         super().__init__()
 
+        # weight init from 1
         self.weight = nn.Parameter(torch.ones(ndim))
+        # bias is optional
+        # bias init from 0
         self.bias = nn.Parameter(torch.zeros(ndim)) if bias else None
 
     def forward(self, x: torch.Tensor):
+        # need shape
         return F.layer_norm(x, self.weight.shape, self.weight, self.bias, 1e-5)
 
 
@@ -94,6 +98,8 @@ class CausalSelfAttention(nn.Module):
             )
         else:
             # manual implementation of attention
+            # parenthese
+            # key_states.transpose not key_states.T !!!
             attn_weights = (query_states @ key_states.transpose(-2, -1)) * (1.0 / math.sqrt(self.head_dim))
             attn_weights = attn_weights.masked_fill(self.tril[..., :T, :T] == 0, float("-inf"))
             attn_weights = F.softmax(attn_weights, dim=-1)
